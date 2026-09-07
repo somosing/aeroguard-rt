@@ -1,0 +1,28 @@
+# Build output
+/build/
+/cmake-build-*/
+
+# Generated binaries and libraries
+*.o
+*.a
+*.so
+
+# Logs and experiment output
+/logs/
+/results/
+/artifacts/
+
+# Simulation output
+*.ulg
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Python tooling used only for reports/scripts
+__pycache__/
+*.pyc
+.venv/
