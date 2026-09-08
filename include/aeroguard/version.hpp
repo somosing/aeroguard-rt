@@ -2,8 +2,9 @@
 
 #include <string_view>
 
-namespace aeroguard {
+namespace aeroguard
+{
 
 [[nodiscard]] std::string_view version() noexcept;
 
-}  // namespace aeroguard
+} // namespace aeroguard

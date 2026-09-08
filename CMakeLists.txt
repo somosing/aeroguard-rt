@@ -6,6 +6,44 @@ project(
     LANGUAGES CXX
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+option(
+    AEROGUARD_ENABLE_SANITIZERS
+    "Enable AddressSanitizer and UndefinedBehaviorSanitizer"
+    OFF
+)
+
+add_library(aeroguard_warnings INTERFACE)
+
+target_compile_options(aeroguard_warnings
+    INTERFACE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
+add_library(aeroguard_sanitizers INTERFACE)
+
+if(AEROGUARD_ENABLE_SANITIZERS)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(aeroguard_sanitizers
+            INTERFACE
+                -fsanitize=address,undefined
+                -fno-omit-frame-pointer
+        )
+
+        target_link_options(aeroguard_sanitizers
+            INTERFACE
+                -fsanitize=address,undefined
+        )
+    else()
+        message(FATAL_ERROR
+            "AEROGUARD_ENABLE_SANITIZERS currently supports GCC and Clang only"
+        )
+    endif()
+endif()
+
 add_library(aeroguard_core
     src/version.cpp
 )
@@ -20,11 +58,10 @@ target_include_directories(aeroguard_core
         ${PROJECT_SOURCE_DIR}/include
 )
 
-target_compile_options(aeroguard_core
-    PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
+target_link_libraries(aeroguard_core
+    PUBLIC
+        aeroguard_warnings
+        aeroguard_sanitizers
 )
 
 add_executable(aeroguard
