@@ -6,6 +6,8 @@ project(
     LANGUAGES CXX
 )
 
+find_package(MAVSDK 3.17.4 EXACT CONFIG REQUIRED)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(
@@ -71,6 +73,7 @@ add_executable(aeroguard
 target_link_libraries(aeroguard
     PRIVATE
         aeroguard_core
+        MAVSDK::mavsdk
 )
 
 include(CTest)
