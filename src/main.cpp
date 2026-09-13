@@ -1,6 +1,8 @@
 #include "aeroguard/version.hpp"
+#include <chrono>
 #include <mavsdk/mavsdk.h>
 #include <mavsdk/system.h>
+#include <thread>
 
 #include <iostream>
 
@@ -23,5 +25,22 @@ int main()
     auto system = *maybe_system;
     std::cout << "Autopilot discovered (system ID: " << static_cast<int>(system->get_system_id())
               << ")\n";
+    bool previous_connected = system->is_connected();
+
+    std::cout << "[connection] " << (previous_connected ? "CONNECTED" : "DISCONNECTED") << '\n';
+
+    while (true)
+    {
+        const bool connected = system->is_connected();
+
+        if (connected != previous_connected)
+        {
+            std::cout << "[connection] " << (connected ? "CONNECTED" : "DISCONNECTED") << '\n';
+
+            previous_connected = connected;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
     return 0;
 }
