@@ -48,6 +48,7 @@ endif()
 
 add_library(aeroguard_core
     src/version.cpp
+    src/gnss_health.cpp
 )
 
 target_compile_features(aeroguard_core
@@ -91,5 +92,19 @@ if(BUILD_TESTING)
     add_test(
         NAME version_test
         COMMAND aeroguard_tests
+    )
+
+    add_executable(gnss_health_tests
+        tests/gnss_health_test.cpp
+    )
+
+    target_link_libraries(gnss_health_tests
+        PRIVATE
+            aeroguard_core
+    )
+
+    add_test(
+        NAME gnss_health_test
+        COMMAND gnss_health_tests
     )
 endif()
