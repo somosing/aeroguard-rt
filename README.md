@@ -33,4 +33,28 @@ The v0.1.0 application will not arm, take off, change flight mode, or command Of
 
 ## Status
 
-Stage 0 — Specification and environment setup.
+Stage 1 — Live GNSS integrity monitoring.
+
+The current implementation includes:
+
+- live PX4 vehicle discovery over MAVSDK,
+- MAVLink connection-state monitoring,
+- event-driven GNSS telemetry ingestion,
+- monotonic telemetry timestamps,
+- GNSS states: `NO_DATA`, `NOMINAL`, `DEGRADED`, `LOST`, and `STALE`,
+- thread-safe GNSS health evaluation,
+- unit tests that run without PX4,
+- deterministic PX4/Gazebo GNSS degradation experiments.
+
+A verified SITL experiment keeps MAVLink connected while degrading GNSS,
+producing:
+
+```text
+[connection] CONNECTED
+[gnss-state] NO_DATA -> NOMINAL
+[gnss-state] NOMINAL -> LOST
+[gnss-state] LOST -> NOMINAL
+```
+
+See [`docs/gnss_integrity_demo.md`](docs/gnss_integrity_demo.md) for the
+reproducible experiment.
