@@ -22,23 +22,28 @@ int main()
 
     {
         aeroguard::GnssHealthMonitor monitor{{1500ms}};
+        const auto evaluation = monitor.evaluate(t0);
 
-        check(monitor.evaluate(t0) == aeroguard::GnssState::NoData, "no sample gives NoData");
+        check(evaluation.state == aeroguard::GnssState::NoData, "no sample gives NoData");
+        check(!evaluation.sample_age, "NoData has no sample age");
+        check(evaluation.stale_threshold == 1500ms, "evaluation exposes stale threshold");
     }
 
     {
         aeroguard::GnssHealthMonitor monitor{{1500ms}};
         monitor.update({aeroguard::GnssFix::Fix3D, 12, t0});
+        const auto evaluation = monitor.evaluate(t0 + 100ms);
 
-        check(monitor.evaluate(t0 + 100ms) == aeroguard::GnssState::Nominal,
-              "fresh 3D fix gives Nominal");
+        check(evaluation.state == aeroguard::GnssState::Nominal, "fresh 3D fix gives Nominal");
+        check(evaluation.sample_age && *evaluation.sample_age == 100ms,
+              "evaluation exposes fresh sample age");
     }
 
     {
         aeroguard::GnssHealthMonitor monitor{{1500ms}};
         monitor.update({aeroguard::GnssFix::Fix2D, 6, t0});
 
-        check(monitor.evaluate(t0 + 100ms) == aeroguard::GnssState::Degraded,
+        check(monitor.evaluate(t0 + 100ms).state == aeroguard::GnssState::Degraded,
               "fresh 2D fix gives Degraded");
     }
 
@@ -46,15 +51,17 @@ int main()
         aeroguard::GnssHealthMonitor monitor{{1500ms}};
         monitor.update({aeroguard::GnssFix::NoFix, 0, t0});
 
-        check(monitor.evaluate(t0 + 100ms) == aeroguard::GnssState::Lost, "NoFix gives Lost");
+        check(monitor.evaluate(t0 + 100ms).state == aeroguard::GnssState::Lost, "NoFix gives Lost");
     }
 
     {
         aeroguard::GnssHealthMonitor monitor{{1500ms}};
         monitor.update({aeroguard::GnssFix::Fix3D, 12, t0});
+        const auto evaluation = monitor.evaluate(t0 + 1500ms);
 
-        check(monitor.evaluate(t0 + 1500ms) == aeroguard::GnssState::Stale,
-              "old sample gives Stale");
+        check(evaluation.state == aeroguard::GnssState::Stale, "old sample gives Stale");
+        check(evaluation.sample_age && *evaluation.sample_age == 1500ms,
+              "stale evaluation exposes sample age");
     }
 
     if (failures != 0)

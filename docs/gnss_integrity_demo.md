@@ -65,7 +65,7 @@ Expected recovery:
 ## Stale-data detection
 
 Stopping GNSS telemetry entirely causes the monitor to transition to `STALE`
-After the configured freshness deadline.
+after the configured freshness deadline.
 
 This is intentionally separate from MAVLink connection state: a connected
 vehicle does not imply that navigation telemetry is fresh or trustworthy.
