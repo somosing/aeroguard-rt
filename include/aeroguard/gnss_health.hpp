@@ -43,6 +43,13 @@ struct GnssMonitorConfig
     std::chrono::milliseconds stale_after{1500};
 };
 
+struct GnssEvaluation
+{
+    GnssState state;
+    std::optional<std::chrono::milliseconds> sample_age;
+    std::chrono::milliseconds stale_threshold;
+};
+
 class GnssHealthMonitor
 {
   public:
@@ -50,7 +57,7 @@ class GnssHealthMonitor
 
     void update(const GnssSample& sample);
 
-    [[nodiscard]] GnssState evaluate(std::chrono::steady_clock::time_point now) const;
+    [[nodiscard]] GnssEvaluation evaluate(std::chrono::steady_clock::time_point now) const;
 
   private:
     GnssMonitorConfig config_;

@@ -1,6 +1,33 @@
 #include "aeroguard/gnss_health.hpp"
 
+#include <chrono>
 #include <mutex>
+
+namespace
+{
+
+aeroguard::GnssState state_from_fix(aeroguard::GnssFix fix) noexcept
+{
+    switch (fix)
+    {
+    case aeroguard::GnssFix::NoGps:
+    case aeroguard::GnssFix::NoFix:
+        return aeroguard::GnssState::Lost;
+
+    case aeroguard::GnssFix::Fix2D:
+        return aeroguard::GnssState::Degraded;
+
+    case aeroguard::GnssFix::Fix3D:
+    case aeroguard::GnssFix::FixDgps:
+    case aeroguard::GnssFix::RtkFloat:
+    case aeroguard::GnssFix::RtkFixed:
+        return aeroguard::GnssState::Nominal;
+    }
+
+    return aeroguard::GnssState::Lost;
+}
+
+} // namespace
 
 namespace aeroguard
 {
@@ -32,39 +59,24 @@ void GnssHealthMonitor::update(const GnssSample& sample)
     latest_sample_ = sample;
 }
 
-GnssState GnssHealthMonitor::evaluate(std::chrono::steady_clock::time_point now) const
+GnssEvaluation GnssHealthMonitor::evaluate(std::chrono::steady_clock::time_point now) const
 {
     const std::lock_guard lock{mutex_};
 
     if (!latest_sample_)
     {
-        return GnssState::NoData;
+        return {GnssState::NoData, std::nullopt, config_.stale_after};
     }
 
     const auto age = now - latest_sample_->received_at;
+    const auto age_ms = std::chrono::duration_cast<std::chrono::milliseconds>(age);
 
     if (age >= config_.stale_after)
     {
-        return GnssState::Stale;
+        return {GnssState::Stale, age_ms, config_.stale_after};
     }
 
-    switch (latest_sample_->fix)
-    {
-    case GnssFix::NoGps:
-    case GnssFix::NoFix:
-        return GnssState::Lost;
-
-    case GnssFix::Fix2D:
-        return GnssState::Degraded;
-
-    case GnssFix::Fix3D:
-    case GnssFix::FixDgps:
-    case GnssFix::RtkFloat:
-    case GnssFix::RtkFixed:
-        return GnssState::Nominal;
-    }
-
-    return GnssState::Lost;
+    return {state_from_fix(latest_sample_->fix), age_ms, config_.stale_after};
 }
 
 } // namespace aeroguard

@@ -1,4 +1,5 @@
 #include "aeroguard/gnss_health.hpp"
+#include "aeroguard/gnss_transition_logger.hpp"
 #include "aeroguard/version.hpp"
 
 #include <chrono>
@@ -68,6 +69,7 @@ int main()
     mavsdk::Telemetry telemetry{system};
 
     aeroguard::GnssHealthMonitor gnss_monitor{aeroguard::GnssMonitorConfig{1500ms}};
+    aeroguard::GnssTransitionLogger gnss_logger{std::cout};
 
     const auto gps_handle = telemetry.subscribe_gps_info(
         [&gnss_monitor](mavsdk::Telemetry::GpsInfo gps_info)
@@ -83,11 +85,7 @@ int main()
 
     bool previous_connected = system->is_connected();
 
-    auto previous_gnss_state = gnss_monitor.evaluate(std::chrono::steady_clock::now());
-
     std::cout << "[connection] " << (previous_connected ? "CONNECTED" : "DISCONNECTED") << '\n';
-
-    std::cout << "[gnss-state] " << aeroguard::to_string(previous_gnss_state) << '\n';
 
     while (true)
     {
@@ -100,15 +98,7 @@ int main()
             previous_connected = connected;
         }
 
-        const auto gnss_state = gnss_monitor.evaluate(std::chrono::steady_clock::now());
-
-        if (gnss_state != previous_gnss_state)
-        {
-            std::cout << "[gnss-state] " << aeroguard::to_string(previous_gnss_state) << " -> "
-                      << aeroguard::to_string(gnss_state) << '\n';
-
-            previous_gnss_state = gnss_state;
-        }
+        gnss_logger.observe(gnss_monitor.evaluate(std::chrono::steady_clock::now()));
 
         std::this_thread::sleep_for(100ms);
     }
