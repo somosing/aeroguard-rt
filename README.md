@@ -19,7 +19,7 @@ AeroGuard-RT is responsible for high-level mission supervision, telemetry health
 
 ### v0.1.0 — Connected Telemetry Observer
 
-The first release will demonstrate that a C++20 AeroGuard application can:
+The v0.1.0 release demonstrates that a C++20 AeroGuard application can:
 
 - discover a PX4 SITL vehicle,
 - receive selected telemetry,
@@ -29,7 +29,7 @@ The first release will demonstrate that a C++20 AeroGuard application can:
 - log important events,
 - run unit tests without requiring PX4.
 
-The v0.1.0 application will not arm, take off, change flight mode, or command Offboard setpoints.
+The v0.1.0 application does not arm, take off, change flight mode, or command Offboard setpoints.
 
 ## Status
 
@@ -45,16 +45,20 @@ The current implementation includes:
 - thread-safe GNSS health evaluation,
 - unit tests that run without PX4,
 - deterministic PX4/Gazebo GNSS degradation experiments,
-- structured GNSS freshness timing on `STALE` transitions.
+- structured GNSS freshness timing on `STALE` transitions,
+- graceful SIGINT/SIGTERM shutdown with structured shutdown logging.
 
-A verified SITL experiment keeps MAVLink connected while degrading GNSS,
-producing:
+Verified SITL observations include GNSS degradation, stale-data detection and
+recovery, and graceful application shutdown:
 
 ```text
 [connection] CONNECTED
 [gnss] NO_DATA -> NOMINAL
 [gnss] NOMINAL -> LOST
 [gnss] LOST -> NOMINAL
+[gnss] NOMINAL -> STALE sample_age_ms=1599 threshold_ms=1500 threshold_overshoot_ms=99
+[gnss] STALE -> NOMINAL
+[app] SHUTDOWN signal=SIGINT
 ```
 
 See [`docs/gnss_integrity_demo.md`](docs/gnss_integrity_demo.md) for the

@@ -5,7 +5,7 @@
 
 int main()
 {
-    constexpr std::string_view expected{"0.1.0-dev"};
+    constexpr std::string_view expected{"0.1.0"};
 
     if (aeroguard::version() != expected)
     {
