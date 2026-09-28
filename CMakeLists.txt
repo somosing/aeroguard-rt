@@ -50,6 +50,7 @@ add_library(aeroguard_core
     src/version.cpp
     src/gnss_health.cpp
     src/gnss_transition_logger.cpp
+    src/shutdown.cpp
 )
 
 target_compile_features(aeroguard_core
@@ -121,5 +122,19 @@ if(BUILD_TESTING)
     add_test(
         NAME gnss_transition_logger_test
         COMMAND gnss_transition_logger_tests
+    )
+
+    add_executable(shutdown_tests
+        tests/shutdown_test.cpp
+    )
+
+    target_link_libraries(shutdown_tests
+        PRIVATE
+            aeroguard_core
+    )
+
+    add_test(
+        NAME shutdown_test
+        COMMAND shutdown_tests
     )
 endif()
