@@ -44,16 +44,17 @@ The current implementation includes:
 - GNSS states: `NO_DATA`, `NOMINAL`, `DEGRADED`, `LOST`, and `STALE`,
 - thread-safe GNSS health evaluation,
 - unit tests that run without PX4,
-- deterministic PX4/Gazebo GNSS degradation experiments.
+- deterministic PX4/Gazebo GNSS degradation experiments,
+- structured GNSS freshness timing on `STALE` transitions.
 
 A verified SITL experiment keeps MAVLink connected while degrading GNSS,
 producing:
 
 ```text
 [connection] CONNECTED
-[gnss-state] NO_DATA -> NOMINAL
-[gnss-state] NOMINAL -> LOST
-[gnss-state] LOST -> NOMINAL
+[gnss] NO_DATA -> NOMINAL
+[gnss] NOMINAL -> LOST
+[gnss] LOST -> NOMINAL
 ```
 
 See [`docs/gnss_integrity_demo.md`](docs/gnss_integrity_demo.md) for the

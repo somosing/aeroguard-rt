@@ -1,5 +1,6 @@
 #include "aeroguard/gnss_health.hpp"
 #include "aeroguard/gnss_transition_logger.hpp"
+#include "aeroguard/shutdown.hpp"
 #include "aeroguard/version.hpp"
 
 #include <chrono>
@@ -42,6 +43,12 @@ int main()
     using namespace std::chrono_literals;
 
     std::cout << "AeroGuard-RT " << aeroguard::version() << '\n';
+
+    if (!aeroguard::install_shutdown_signal_handlers())
+    {
+        std::cerr << "Failed to install shutdown signal handlers\n";
+        return 1;
+    }
 
     mavsdk::Mavsdk mav{mavsdk::Mavsdk::Configuration{mavsdk::ComponentType::CompanionComputer}};
 
@@ -87,7 +94,7 @@ int main()
 
     std::cout << "[connection] " << (previous_connected ? "CONNECTED" : "DISCONNECTED") << '\n';
 
-    while (true)
+    while (!aeroguard::shutdown_requested())
     {
         const bool connected = system->is_connected();
 
@@ -102,4 +109,9 @@ int main()
 
         std::this_thread::sleep_for(100ms);
     }
+
+    std::cout << "[app] SHUTDOWN signal=" << aeroguard::signal_name(aeroguard::shutdown_signal())
+              << '\n';
+
+    return 0;
 }
