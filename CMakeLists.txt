@@ -51,6 +51,7 @@ add_library(aeroguard_core
     src/gnss_health.cpp
     src/gnss_transition_logger.cpp
     src/shutdown.cpp
+    src/watchdog_policy.cpp
 )
 
 target_compile_features(aeroguard_core
