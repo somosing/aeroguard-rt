@@ -138,4 +138,17 @@ if(BUILD_TESTING)
         NAME shutdown_test
         COMMAND shutdown_tests
     )
+    add_executable(watchdog_policy_tests
+        tests/watchdog_policy_test.cpp
+    )
+
+    target_link_libraries(watchdog_policy_tests
+        PRIVATE
+            aeroguard_core
+    )
+
+    add_test(
+        NAME watchdog_policy_test
+        COMMAND watchdog_policy_tests
+    )
 endif()
